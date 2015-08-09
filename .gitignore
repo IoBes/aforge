@@ -1,0 +1,24 @@
+Sources/Imaging/obj/
+Sources/Math/obj/
+Sources/MachineLearning/obj/
+Sources/Fuzzy/obj/
+Sources/Controls/obj/
+Sources/Video.Kinect/obj/
+Sources/Video.FFMPEG/x64/
+Release/
+Sources/Vision/obj/
+Sources/x64/
+Sources/Genetic/obj/
+Sources/Robotics.Lego/obj/
+Sources/Neuro/obj/
+Sources/ipch/
+Sources/Build All.opensdf
+Sources/Build All.sdf
+Sources/Video.Ximea/obj/
+Sources/Video.DirectShow/obj/
+Sources/Robotics.Surveyor/obj/
+Sources/Robotics.TeRK/obj/
+Sources/Video/obj/
+Sources/Imaging.Formats/obj/
+Sources/Video.VFW/obj/
+Sources/Core/obj/

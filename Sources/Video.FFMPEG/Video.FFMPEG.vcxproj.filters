@@ -47,4 +47,13 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Externals\ffmpeg\bin\avcodec-56.dll" />
+    <None Include="..\..\Externals\ffmpeg\bin\avdevice-56.dll" />
+    <None Include="..\..\Externals\ffmpeg\bin\avfilter-5.dll" />
+    <None Include="..\..\Externals\ffmpeg\bin\avformat-56.dll" />
+    <None Include="..\..\Externals\ffmpeg\bin\avutil-54.dll" />
+    <None Include="..\..\Externals\ffmpeg\bin\swresample-1.dll" />
+    <None Include="..\..\Externals\ffmpeg\bin\swscale-3.dll" />
+  </ItemGroup>
 </Project>

@@ -8,6 +8,7 @@
 
 #include "StdAfx.h"
 #include "VideoFileWriter.h"
+typedef __int64 int64_t;
 
 namespace libffmpeg
 {
@@ -32,7 +33,7 @@ namespace AForge { namespace Video { namespace FFMPEG
 static void write_video_frame( WriterPrivateData^ data );
 static void open_video( WriterPrivateData^ data );
 static void add_video_stream( WriterPrivateData^ data, int width, int height, int frameRate, int bitRate,
-							  enum libffmpeg::CodecID codec_id, enum libffmpeg::PixelFormat pixelFormat );
+							  enum libffmpeg::AVCodecID codec_id, enum libffmpeg::Pixel_Format pixelFormat );
 
 // A structure to encapsulate all FFMPEG related private variable
 ref struct WriterPrivateData
@@ -144,14 +145,14 @@ void VideoFileWriter::Open( String^ fileName, int width, int height, int frameRa
 
 		// add video stream using the specified video codec
 		add_video_stream( data, width, height, frameRate, bitRate,
-			( codec == VideoCodec::Default ) ? outputFormat->video_codec : (libffmpeg::CodecID) video_codecs[(int) codec],
-			( codec == VideoCodec::Default ) ? libffmpeg::PIX_FMT_YUV420P : (libffmpeg::PixelFormat) pixel_formats[(int) codec] );
+			( codec == VideoCodec::Default ) ? outputFormat->video_codec : (libffmpeg::AVCodecID) video_codecs[(int) codec],
+			( codec == VideoCodec::Default ) ? libffmpeg::PIX_FMT_YUV420P : (libffmpeg::AVPixelFormat) pixel_formats[(int) codec] );
 
 		// set the output parameters (must be done even if no parameters)
-		if ( libffmpeg::av_set_parameters( data->FormatContext, NULL ) < 0 )
-		{
-			throw gcnew VideoException( "Failed configuring format context." );
-		}
+		// if ( libffmpeg::av_set_parameters( data->FormatContext, NULL ) < 0 )
+		//{
+		//	throw gcnew VideoException( "Failed configuring format context." );
+		//}
 
 		open_video( data );
 
@@ -164,7 +165,7 @@ void VideoFileWriter::Open( String^ fileName, int width, int height, int frameRa
 			}
 		}
 
-		libffmpeg::av_write_header( data->FormatContext );
+		libffmpeg::avformat_write_header( data->FormatContext,NULL );
 
 		success = true;
 	}
@@ -348,7 +349,7 @@ void write_video_frame( WriterPrivateData^ data )
 }
 
 // Allocate picture of the specified format and size
-static libffmpeg::AVFrame* alloc_picture( enum libffmpeg::PixelFormat pix_fmt, int width, int height )
+static libffmpeg::AVFrame* alloc_picture( enum libffmpeg::AVPixelFormat pix_fmt, int width, int height )
 {
 	libffmpeg::AVFrame* picture;
 	void* picture_buf;
@@ -375,12 +376,13 @@ static libffmpeg::AVFrame* alloc_picture( enum libffmpeg::PixelFormat pix_fmt, i
 
 // Create new video stream and configure it
 void add_video_stream( WriterPrivateData^ data,  int width, int height, int frameRate, int bitRate,
-					  enum libffmpeg::CodecID codecId, enum libffmpeg::PixelFormat pixelFormat )
+					  enum libffmpeg::AVCodecID codecId, enum libffmpeg::AVPixelFormat pixelFormat )
 {
 	libffmpeg::AVCodecContext* codecContex;
 
 	// create new stream
-	data->VideoStream = libffmpeg::av_new_stream( data->FormatContext, 0 );
+	data->VideoStream = libffmpeg::avformat_new_stream( data->FormatContext, NULL );
+	data->VideoStream->id = 0;
 	if ( !data->VideoStream )
 	{
 		throw gcnew VideoException( "Failed creating new video stream." );
@@ -432,7 +434,7 @@ void open_video( WriterPrivateData^ data )
 	}
 
 	// open the codec 
-	if ( avcodec_open( codecContext, codec ) < 0 )
+	if ( avcodec_open2( codecContext, codec, NULL ) < 0 )
 	{
 		throw gcnew VideoException( "Cannot open video codec." );
 	}

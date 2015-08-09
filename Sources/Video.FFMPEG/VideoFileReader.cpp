@@ -68,7 +68,7 @@ static libffmpeg::AVFormatContext* open_file( char* fileName )
 {
 	libffmpeg::AVFormatContext* formatContext;
 
-	if ( libffmpeg::av_open_input_file( &formatContext, fileName, NULL, 0, NULL ) !=0 )
+	if ( libffmpeg::avformat_open_input( &formatContext, fileName, NULL, NULL ) !=0 )
 	{
 		return NULL;
 	}
@@ -107,7 +107,7 @@ void VideoFileReader::Open( String^ fileName )
 		}
 
 		// retrieve stream information
-		if ( libffmpeg::av_find_stream_info( data->FormatContext ) < 0 )
+		if ( libffmpeg::avformat_find_stream_info( data->FormatContext, NULL ) < 0 )
 		{
 			throw gcnew VideoException( "Cannot find stream information." );
 		}
@@ -136,13 +136,13 @@ void VideoFileReader::Open( String^ fileName )
 		}
 
 		// open the codec
-		if ( libffmpeg::avcodec_open( data->CodecContext, codec ) < 0 )
+		if ( libffmpeg::avcodec_open2( data->CodecContext, codec, NULL ) < 0 )
 		{
 			throw gcnew VideoException( "Cannot open video codec." );
 		}
 
 		// allocate video frame
-		data->VideoFrame = libffmpeg::avcodec_alloc_frame( );
+		data->VideoFrame = libffmpeg::av_frame_alloc();// avcodec_alloc_frame( );
 
 		// prepare scaling context to convert RGB image to video format
 		data->ConvertContext = libffmpeg::sws_getContext( data->CodecContext->width, data->CodecContext->height, data->CodecContext->pix_fmt,
@@ -192,7 +192,8 @@ void VideoFileReader::Close(  )
 
 		if ( data->FormatContext != NULL )
 		{
-			libffmpeg::av_close_input_file( data->FormatContext );
+			libffmpeg::AVFormatContext *cont = data->FormatContext;
+			libffmpeg::avformat_close_input( &cont );
 		}
 
 		if ( data->ConvertContext != NULL )
@@ -298,11 +299,11 @@ Bitmap^ VideoFileReader::ReadVideoFrame(  )
 // Decodes video frame into managed Bitmap
 Bitmap^ VideoFileReader::DecodeVideoFrame( )
 {
-	Bitmap^ bitmap = gcnew Bitmap( data->CodecContext->width, data->CodecContext->height, PixelFormat::Format24bppRgb );
+	Bitmap^ bitmap = gcnew Bitmap(data->CodecContext->width, data->CodecContext->height, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
 	
 	// lock the bitmap
 	BitmapData^ bitmapData = bitmap->LockBits( System::Drawing::Rectangle( 0, 0, data->CodecContext->width, data->CodecContext->height ),
-		ImageLockMode::ReadOnly, PixelFormat::Format24bppRgb );
+		ImageLockMode::ReadOnly, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
 
 	libffmpeg::uint8_t* ptr = reinterpret_cast<libffmpeg::uint8_t*>( static_cast<void*>( bitmapData->Scan0 ) );
 

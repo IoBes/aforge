@@ -45,4 +45,4 @@ int pixel_formats[] =
 	libffmpeg::PIX_FMT_BGR24,
 };
 
-int CODECS_COUNT ( sizeof( video_codecs ) / sizeof( libffmpeg::CodecID ) );
+int CODECS_COUNT ( sizeof( video_codecs ) / sizeof( libffmpeg::AVCodecID ) );
